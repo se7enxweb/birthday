@@ -2,8 +2,8 @@
 <software>
     <metadata>
         <name>Birthday extension for eZ Publish Legacy</name>
-        <version>1.0</version>
-        <copyright>Copyright (C) 2015 xrow GmbH and Netgen d.o.o.</copyright>
+        <version>1.3.0</version>
+        <copyright>Copyright (C) 1999 - 2024 7x and xrow GmbH and Netgen d.o.o.</copyright>
         <license>GPL 2.0</license>
         <info_url>http://projects.ez.no/birthday</info_url>
     </metadata>
