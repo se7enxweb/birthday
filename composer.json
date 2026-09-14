@@ -24,6 +24,9 @@
     "require": {
         "se7enxweb/ezpublish-legacy-installer": "*"
     },
+    "suggest": {
+        "se7enxweb/xrowextract": "Needed only by the csv export handler, which extends XrowBaseHandler. Everything else in this extension works without it."
+    },
     "extra": {
         "ezpublish-legacy-extension-name": "birthday"
     }
