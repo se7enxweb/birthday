@@ -116,9 +116,16 @@ class eZBirthday
                         12 => ezpI18n::tr( 'kernel/classes/datatypes', 'Pisces' ),
                     );
 
-        list( $sign_start, $sign_name ) = each( $signs[(int)$month-1] );
+        // each() is gone since PHP 8.0: the first key and value of the one-entry array
+        $sign = $signs[(int)$month-1];
+        $sign_start = key( $sign );
+        $sign_name = current( $sign );
         if ( $day < $sign_start )
-            list( $sign_start, $sign_name ) = each( $signs[( $month -2 < 0 ) ? $month = 11: $month -= 2] );
+        {
+            $sign = $signs[( $month -2 < 0 ) ? $month = 11: $month -= 2];
+            $sign_start = key( $sign );
+            $sign_name = current( $sign );
+        }
         return array( "Number" => $sign_name, "Name" => $name[$sign_name] );
     }
 
