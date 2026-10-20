@@ -28,6 +28,18 @@
         <source>Year</source>
         <translation>År</translation>
     </message>
+    <message>
+        <source>Please enter the year</source>
+        <translation>Angi år</translation>
+    </message>
+    <message>
+        <source>Please enter the month</source>
+        <translation>Angi måned</translation>
+    </message>
+    <message>
+        <source>Please enter the day</source>
+        <translation>Angi dag</translation>
+    </message>
 </context>
 <context>
     <name>kernel/classes/datatypes</name>
@@ -87,6 +99,10 @@
         <source>Birthday</source>
         <comment>Datatype name</comment>
         <translation>Bursdag</translation>
+    </message>
+    <message>
+        <source>Please enter a correct date.</source>
+        <translation>Skriv inn en gyldig dato.</translation>
     </message>
 </context>
 </TS>
