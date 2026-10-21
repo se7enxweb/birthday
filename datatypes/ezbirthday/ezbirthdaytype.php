@@ -14,9 +14,85 @@ class eZBirthdayType extends eZDataType
 
     }
 
-    static function addZero( $value )
+    public static function addZero( $value )
     {
         return sprintf( "%02d", $value );
+    }
+
+
+    /**
+     * The three posted parts of a birthday for one attribute.
+     *
+     * @return array|null array( year, month, day ) as trimmed strings, null when the form did not send all three
+     */
+    protected static function postedParts( $http, $base, $contentObjectAttribute )
+    {
+        $id = $contentObjectAttribute->attribute( 'id' );
+        $names = array( $base . '_birthday_year_' . $id, $base . '_birthday_month_' . $id, $base . '_birthday_day_' . $id );
+        foreach ( $names as $name )
+        {
+            if ( !$http->hasPostVariable( $name ) )
+                return null;
+        }
+        return array( trim( (string) $http->postVariable( $names[0] ) ),
+                      trim( (string) $http->postVariable( $names[1] ) ),
+                      trim( (string) $http->postVariable( $names[2] ) ) );
+    }
+
+    /**
+     * True when the three parts are whole numbers that form a real calendar date. checkdate() throws a TypeError
+     * on text since PHP 8, so the text is rejected here first.
+     */
+    protected static function isRealDate( $year, $month, $day )
+    {
+        if ( !ctype_digit( (string) $year ) or !ctype_digit( (string) $month ) or !ctype_digit( (string) $day ) )
+            return false;
+        if ( strlen( (string) $year ) > 4 )
+            return false;
+        return checkdate( (int) $month, (int) $day, (int) $year );
+    }
+
+    /**
+     * The value stored in data_text: YYYY-MM-DD, or null when a part is missing.
+     */
+    protected static function storedValue( $year, $month, $day )
+    {
+        if ( $year === '' or $month === '' or $day === '' )
+            return null;
+        return sprintf( '%04d', (int) $year ) . '-' . self::addZero( (int) $month ) . '-' . self::addZero( (int) $day );
+    }
+
+    /**
+     * Shared by both validate methods; $skipWhenCollector is true for object attributes that collect information.
+     */
+    protected function validateParts( $http, $base, $contentObjectAttribute, $skipWhenCollector )
+    {
+        $parts = self::postedParts( $http, $base, $contentObjectAttribute );
+        list( $year, $month, $day ) = $parts === null ? array( '', '', '' ) : $parts;
+
+        $classAttribute = $contentObjectAttribute->contentClassAttribute();
+        $isRequired = (bool) $classAttribute->attribute( 'is_required' );
+
+        if ( $skipWhenCollector and $classAttribute->attribute( 'is_information_collector' ) )
+            return eZInputValidator::STATE_ACCEPTED;
+
+        if ( !$isRequired and $year === '' and $month === '' and $day === '' )
+            return eZInputValidator::STATE_ACCEPTED;
+
+        // required: all three parts; optional: all or none (a half filled date is not a birthday)
+        if ( $year === '' or $month === '' or $day === '' )
+        {
+            $contentObjectAttribute->setValidationError( ezpI18n::tr( 'kernel/classes/datatypes',
+                                                                 'Missing date input.' ) );
+            return eZInputValidator::STATE_INVALID;
+        }
+
+        if ( self::isRealDate( $year, $month, $day ) )
+            return eZInputValidator::STATE_ACCEPTED;
+
+        $contentObjectAttribute->setValidationError( ezpI18n::tr( 'kernel/classes/datatypes',
+                                                             'Please enter a correct date.' ) );
+        return eZInputValidator::STATE_INVALID;
     }
 
     /*!
@@ -25,47 +101,7 @@ class eZBirthdayType extends eZDataType
     */
     function validateObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
-        $year = $day = $month = '';
-
-        if ( $http->hasPostVariable( $base . "_birthday_year_" . $contentObjectAttribute->attribute( "id" ) ) and
-             $http->hasPostVariable( $base . "_birthday_month_" . $contentObjectAttribute->attribute( "id" ) ) and
-             $http->hasPostVariable( $base . "_birthday_day_" . $contentObjectAttribute->attribute( "id" ) ) )
-        {
-            $year = $http->postVariable( $base . "_birthday_year_" . $contentObjectAttribute->attribute( "id" ) );
-            $month = $http->postVariable( $base . "_birthday_month_" . $contentObjectAttribute->attribute( "id" ) );
-            $day = $http->postVariable( $base . "_birthday_day_" . $contentObjectAttribute->attribute( "id" ) );
-        }
-
-        $classAttribute = $contentObjectAttribute->contentClassAttribute();
-
-        if ( ( ( $classAttribute->attribute( "is_required" ) == false ) and
-             $year == '' and $month == '' and $day == '' ) or
-             $classAttribute->attribute( 'is_information_collector' ) )
-        {
-            return eZInputValidator::STATE_ACCEPTED;
-        }
-
-        if ( $classAttribute->attribute( "is_required" ) and
-             $year == '' or $month == '' or $day == '' )
-        {
-            $contentObjectAttribute->setValidationError( ezpI18n::tr( 'kernel/classes/datatypes',
-                                                                 'Missing date input.' ) );
-            return eZInputValidator::STATE_INVALID;
-        }
-
-        $datetime = checkdate( $month, $day, $year );
-        if ( $datetime !== false )
-        {
-            return eZInputValidator::STATE_ACCEPTED;
-        }
-        else
-        {
-            $contentObjectAttribute->setValidationError( ezpI18n::tr( 'kernel/classes/datatypes',
-                                                                 'Please enter a correct date.' ) );
-            return eZInputValidator::STATE_INVALID;
-        }
-
-
+        return $this->validateParts( $http, $base, $contentObjectAttribute, true );
     }
 
     /*!
@@ -74,42 +110,7 @@ class eZBirthdayType extends eZDataType
     */
     function validateCollectionAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
-        $year = $day = $month = '';
-        if ( $http->hasPostVariable( $base . "_birthday_year_" . $contentObjectAttribute->attribute( "id" ) ) and
-             $http->hasPostVariable( $base . "_birthday_month_" . $contentObjectAttribute->attribute( "id" ) ) and
-             $http->hasPostVariable( $base . "_birthday_day_" . $contentObjectAttribute->attribute( "id" ) ) )
-        {
-            $year = $http->postVariable( $base . "_birthday_year_" . $contentObjectAttribute->attribute( "id" ) );
-            $month = $http->postVariable( $base . "_birthday_month_" . $contentObjectAttribute->attribute( "id" ) );
-            $day = $http->postVariable( $base . "_birthday_day_" . $contentObjectAttribute->attribute( "id" ) );
-        }
-
-        $classAttribute = $contentObjectAttribute->contentClassAttribute();
-        if ( ( $classAttribute->attribute( "is_required" ) == false ) and
-             $year == '' and $month == '' and $day == '' )
-        {
-            return eZInputValidator::STATE_ACCEPTED;
-        }
-        if ( $classAttribute->attribute( "is_required" ) and
-             $year == '' or $month == '' or $day == '' )
-        {
-            $contentObjectAttribute->setValidationError( ezpI18n::tr( 'kernel/classes/datatypes',
-                                                                 'Missing date input.' ) );
-            return eZInputValidator::STATE_INVALID;
-        }
-
-        $datetime = checkdate( $month, $day, $year );
-
-        if ( $datetime !== false )
-        {
-            return eZInputValidator::STATE_ACCEPTED;
-        }
-        else
-        {
-            $contentObjectAttribute->setValidationError( ezpI18n::tr( 'kernel/classes/datatypes',
-                                                                 'Please enter a correct date.' ) );
-            return eZInputValidator::STATE_INVALID;
-        }
+        return $this->validateParts( $http, $base, $contentObjectAttribute, false );
     }
 
     /*!
@@ -117,24 +118,9 @@ class eZBirthdayType extends eZDataType
     */
     function fetchObjectAttributeHTTPInput( $http, $base, $contentObjectAttribute )
     {
-        $year = $day = $month = '';
-        if ( $http->hasPostVariable( $base . "_birthday_year_" . $contentObjectAttribute->attribute( "id" ) ) and
-             $http->hasPostVariable( $base . "_birthday_month_" . $contentObjectAttribute->attribute( "id" ) ) and
-             $http->hasPostVariable( $base . "_birthday_day_" . $contentObjectAttribute->attribute( "id" ) ) )
-        {
-            $year = $http->postVariable( $base . "_birthday_year_" . $contentObjectAttribute->attribute( "id" ) );
-            $month = $http->postVariable( $base . "_birthday_month_" . $contentObjectAttribute->attribute( "id" ) );
-            $day = $http->postVariable( $base . "_birthday_day_" . $contentObjectAttribute->attribute( "id" ) );
-        }
-
-        if ( $year == '' or $month == '' or $day == '' )
-        {
-            $date = null;
-        }
-        else
-            $date = $year . '-'.eZBirthdayType::addZero( $month ) . '-'. eZBirthdayType::addZero( $day );
-
-        $contentObjectAttribute->setAttribute( "data_text", $date );
+        $parts = self::postedParts( $http, $base, $contentObjectAttribute );
+        list( $year, $month, $day ) = $parts === null ? array( '', '', '' ) : $parts;
+        $contentObjectAttribute->setAttribute( "data_text", self::storedValue( $year, $month, $day ) );
         return true;
     }
 
@@ -143,27 +129,12 @@ class eZBirthdayType extends eZDataType
     */
     function fetchCollectionAttributeHTTPInput( $collection, $collectionAttribute, $http, $base, $contentObjectAttribute )
     {
-        $year = $day = $month = '';
-        if ( $http->hasPostVariable( $base . '_birthday_year_' . $contentObjectAttribute->attribute( 'id' ) ) and
-             $http->hasPostVariable( $base . '_birthday_month_' . $contentObjectAttribute->attribute( 'id' ) ) and
-             $http->hasPostVariable( $base . '_birthday_day_' . $contentObjectAttribute->attribute( 'id' ) ) )
-        {
-
-            $year  = $http->postVariable( $base . '_birthday_year_' . $contentObjectAttribute->attribute( 'id' ) );
-            $month = $http->postVariable( $base . '_birthday_month_' . $contentObjectAttribute->attribute( 'id' ) );
-            $day   = $http->postVariable( $base . '_birthday_day_' . $contentObjectAttribute->attribute( 'id' ) );
-            //$date = new eZDate();
-            $contentClassAttribute = $contentObjectAttribute->contentClassAttribute();
-
-            if ( $year == '' or $month == '' or $day == '' )
-                $date = NULL;
-            else
-                $date = $year . '-'.eZBirthdayType::addZero( $month ) . '-'. eZBirthdayType::addZero( $day );
-
-            $collectionAttribute->setAttribute( 'data_text', $date );
-            return true;
-        }
-        return false;
+        $parts = self::postedParts( $http, $base, $contentObjectAttribute );
+        if ( $parts === null )
+            return false;
+        list( $year, $month, $day ) = $parts;
+        $collectionAttribute->setAttribute( 'data_text', self::storedValue( $year, $month, $day ) );
+        return true;
     }
 
     /*!
@@ -171,8 +142,8 @@ class eZBirthdayType extends eZDataType
     */
     function objectAttributeContent( $contentObjectAttribute )
     {
-        $dateStr = $contentObjectAttribute->attribute( 'data_text' );
-        if ( preg_match( "/([0-9]{4})-([0-9]{2})-([0-9]{2})/", $dateStr, $valueArray ) )
+        $dateStr = (string) $contentObjectAttribute->attribute( 'data_text' );
+        if ( preg_match( "/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $dateStr, $valueArray ) )
         {
             $year = $valueArray[1];
             $month =  $valueArray[2];
@@ -223,7 +194,9 @@ class eZBirthdayType extends eZDataType
         $default = $base . "_ezbirthday_default_" . $classAttribute->attribute( 'id' );
         if ( $http->hasPostVariable( $default ) )
         {
-            $defaultValue = $http->postVariable( $default );
+            $defaultValue = (int) $http->postVariable( $default );
+            if ( $defaultValue !== self::BIRTHDAY_DEFAULT_CURRENT_DATE )
+                $defaultValue = self::BIRTHDAY_DEFAULT_EMTPY;
             $classAttribute->setAttribute( self::BIRTHDAY_DEFAULT,  $defaultValue );
         }
         return true;
@@ -260,7 +233,7 @@ class eZBirthdayType extends eZDataType
 
     function hasObjectAttributeContent( $contentObjectAttribute )
     {
-        return ( strlen( $contentObjectAttribute->attribute( "data_text" ) ) > 0 );
+        return ( strlen( (string) $contentObjectAttribute->attribute( "data_text" ) ) > 0 );
     }
 
     /*!
@@ -303,6 +276,7 @@ class eZBirthdayType extends eZDataType
     function unserializeContentClassAttribute( $classAttribute, $attributeNode, $attributeParametersNode )
     {
         
+        $defaultValue = 'empty';
         foreach ( $attributeParametersNode->getElementsByTagName( 'default-value' ) as $attribute )
         {
             $defaultValue = $attribute->getAttribute( 'type' );

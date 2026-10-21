@@ -2,13 +2,13 @@
 
 class eZBirthday
 {
-    function __construct( $birthday = array() )
+    public function __construct( $birthday = array() )
     {
         if ( is_array( $birthday ) and count( $birthday ) > 0 )
         {
-            $this->Day = $birthday["day"];
-            $this->Month = $birthday["month"];
-            $this->Year = $birthday["year"];
+            $this->Day = (int) $birthday["day"];
+            $this->Month = (int) $birthday["month"];
+            $this->Year = (int) $birthday["year"];
 
             if ( checkdate( $this->Month, $this->Day, $this->Year ) !== false )
             {
@@ -21,23 +21,23 @@ class eZBirthday
                     $this->Zodiac_Name = $zodiac["Name"];
                 }
 
-                $this->Days_On_Earth = abs( self::gregorianToJD( $this->Month,
+                $this->Days_On_Earth = (int) abs( self::gregorianToJD( $this->Month,
                                                                        $this->Day,
                                                                        $this->Year ) -
                                                                        self::gregorianToJD(
-                                                                         date( "m" ),
-                                                                         date( "d" ),
-                                                                         date( "Y" ) ) );
+                                                                         (int) date( "m" ),
+                                                                         (int) date( "d" ),
+                                                                         (int) date( "Y" ) ) );
 
-                $today = date( "Y" ) . sprintf( "%02d", date( "m" ) ) . sprintf( "%02d", date( "d" ) );
-                $birthday = $this->Year . sprintf( "%02d", $this->Month ) . sprintf( "%02d", $this->Day );
+                $today = (int) ( date( "Y" ) . date( "m" ) . date( "d" ) );
+                $birthday = (int) ( sprintf( "%04d", $this->Year ) . sprintf( "%02d", $this->Month ) . sprintf( "%02d", $this->Day ) );
 
-                $this->Age = floor( ( $today - $birthday ) / 10000 );
+                $this->Age = (int) floor( ( $today - $birthday ) / 10000 );
             }
         }
     }
 
-    function gregorianToJD( $month, $day, $year )
+    public static function gregorianToJD( $month, $day, $year )
     {
         if ( $month > 2 )
             $month = $month - 3;
@@ -57,7 +57,17 @@ class eZBirthday
         return $j;
     }
 
-    function attributes()
+    /**
+     * "Virgo". The message id of the translation files has always been the misspelled "Virgio", so that one is
+     * looked up first; a language that does not translate it gets the correct English name.
+     */
+    protected static function virgoName()
+    {
+        $translated = ezpI18n::tr( 'kernel/classes/datatypes', 'Virgio' );
+        return $translated === 'Virgio' ? 'Virgo' : $translated;
+    }
+
+    public function attributes()
     {
         return array( 'day',
                       'month',
@@ -71,7 +81,7 @@ class eZBirthday
                       'age' );
     }
 
-    function hasAttribute( $name )
+    public function hasAttribute( $name )
     {
         $attributes = self::attributes();
         if ( in_array( $name, $attributes ) )
@@ -80,7 +90,7 @@ class eZBirthday
             return false;
     }
 
-    function get_zodiac_sign( $month, $day )
+    public static function get_zodiac_sign( $month, $day )
     {
         // Check arguments for validity
         if ( $month < 1 || $month > 12 || $day < 1 || $day > 31 )
@@ -107,7 +117,7 @@ class eZBirthday
                         3 =>  ezpI18n::tr( 'kernel/classes/datatypes', 'Gemini' ),
                         4 =>  ezpI18n::tr( 'kernel/classes/datatypes', 'Cancer' ),
                         5 =>  ezpI18n::tr( 'kernel/classes/datatypes', 'Leo' ),
-                        6 =>  ezpI18n::tr( 'kernel/classes/datatypes', 'Virgio' ),
+                        6 =>  self::virgoName(),
                         7 =>  ezpI18n::tr( 'kernel/classes/datatypes', 'Libra' ),
                         8 =>  ezpI18n::tr( 'kernel/classes/datatypes', 'Scorpio' ),
                         9 =>  ezpI18n::tr( 'kernel/classes/datatypes', 'Sagittarius' ),
@@ -129,7 +139,7 @@ class eZBirthday
         return array( "Number" => $sign_name, "Name" => $name[$sign_name] );
     }
 
-   function attribute( $name )
+    public function attribute( $name )
     {
         switch ( $name )
         {
@@ -151,7 +161,7 @@ class eZBirthday
             case "has_content":
             case "is_valid":
             {
-                return checkdate( $this->Month, $this->Day, $this->Year );
+                return checkdate( (int) $this->Month, (int) $this->Day, (int) $this->Year );
             }break;
 
             case "zodiac_no":
@@ -175,6 +185,7 @@ class eZBirthday
                 return $this->Age;
             }break;
         }
+        return null;
     }
 
     private $Day;

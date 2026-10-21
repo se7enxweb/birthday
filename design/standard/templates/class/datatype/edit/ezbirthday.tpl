@@ -1,7 +1,8 @@
+{* The default is kept in data_text1 of the class attribute, as it always was *}
 <div class="block">
-<label>{"Default value"|i18n("design/standard/class/datatype")}</label><div class="labelbreak"></div>
-<select name="ContentClass_ezbirthday_default_{$class_attribute.id}">
-    <option value="0" {section show=eq($class_attribute.data_int1,0)}selected{/section}>{"Empty"|i18n("design/standard/class/datatype")}</option>
-    <option value="1" {section show=eq($class_attribute.data_int1,1)}selected{/section}>{"Current date"|i18n("design/standard/class/datatype")}</option>
+<label for="ezbirthday-default-{$class_attribute.id}">{'Default value'|i18n( 'design/standard/class/datatype' )}</label>
+<select id="ezbirthday-default-{$class_attribute.id}" name="ContentClass_ezbirthday_default_{$class_attribute.id}">
+    <option value="0"{if eq( $class_attribute.data_text1, 0 )} selected="selected"{/if}>{'Empty'|i18n( 'design/standard/class/datatype' )}</option>
+    <option value="1"{if eq( $class_attribute.data_text1, 1 )} selected="selected"{/if}>{'Current date'|i18n( 'design/standard/class/datatype' )}</option>
 </select>
 </div>
