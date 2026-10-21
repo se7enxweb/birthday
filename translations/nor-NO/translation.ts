@@ -3,7 +3,7 @@
     <name>design/standard/class/datatype</name>
     <message>
         <source>Default value</source>
-        <translation>Standard Verdi</translation>
+        <translation>Standardverdi</translation>
     </message>
     <message>
         <source>Empty</source>
@@ -11,7 +11,7 @@
     </message>
     <message>
         <source>Current date</source>
-        <translation>Dato Nå</translation>
+        <translation>Nåværende dato</translation>
     </message>
 </context>
 <context>
@@ -30,22 +30,22 @@
     </message>
     <message>
         <source>Please enter the year</source>
-        <translation>Angi år</translation>
+        <translation>Skriv inn året</translation>
     </message>
     <message>
         <source>Please enter the month</source>
-        <translation>Angi måned</translation>
+        <translation>Skriv inn måneden</translation>
     </message>
     <message>
         <source>Please enter the day</source>
-        <translation>Angi dag</translation>
+        <translation>Skriv inn dagen</translation>
     </message>
 </context>
 <context>
     <name>kernel/classes/datatypes</name>
     <message>
         <source>Missing date input.</source>
-        <translation>Mangler dato input.</translation>
+        <translation>Mangler dato.</translation>
     </message>
     <message>
         <source>Aries</source>
@@ -61,15 +61,15 @@
     </message>
     <message>
         <source>Cancer</source>
-        <translation>Kreps</translation>
+        <translation>Krepsen</translation>
     </message>
     <message>
         <source>Leo</source>
-        <translation>Løve</translation>
+        <translation>Løven</translation>
     </message>
     <message>
         <source>Virgio</source>
-        <translation>Jomfru</translation>
+        <translation>Jomfruen</translation>
     </message>
     <message>
         <source>Libra</source>
@@ -77,7 +77,7 @@
     </message>
     <message>
         <source>Scorpio</source>
-        <translation>Skorpion</translation>
+        <translation>Skorpionen</translation>
     </message>
     <message>
         <source>Sagittarius</source>
@@ -85,15 +85,15 @@
     </message>
     <message>
         <source>Capricorn</source>
-        <translation>Steinbukk</translation>
+        <translation>Steinbukken</translation>
     </message>
     <message>
         <source>Aquarius</source>
-        <translation>Vannmann</translation>
+        <translation>Vannmannen</translation>
     </message>
     <message>
         <source>Pisces</source>
-        <translation>Fisk</translation>
+        <translation>Fiskene</translation>
     </message>
     <message>
         <source>Birthday</source>
