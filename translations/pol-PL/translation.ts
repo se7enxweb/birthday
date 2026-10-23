@@ -30,15 +30,15 @@
     </message>
     <message>
         <source>Please enter the year</source>
-        <translation>Podaj rok</translation>
+        <translation>Podać rok</translation>
     </message>
     <message>
         <source>Please enter the month</source>
-        <translation>Podaj miesiąc</translation>
+        <translation>Podać miesiąc</translation>
     </message>
     <message>
         <source>Please enter the day</source>
-        <translation>Podaj dzień</translation>
+        <translation>Podać dzień</translation>
     </message>
 </context>
 <context>
