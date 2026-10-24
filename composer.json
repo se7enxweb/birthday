@@ -5,7 +5,7 @@
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name" : "7x",
+            "name": "7x",
             "homepage": "https://se7enx.com",
             "email": "info@se7enx.com",
             "role": "Developer"
@@ -24,6 +24,9 @@
     "require": {
         "se7enxweb/ezpublish-legacy-installer": "*"
     },
+    "replace": {
+        "netgen/birthday": "self.version"
+    },
     "suggest": {
         "se7enxweb/xrowextract": "Needed only by the csv export handler, which extends XrowBaseHandler. Everything else in this extension works without it."
     },
@@ -31,4 +34,3 @@
         "ezpublish-legacy-extension-name": "birthday"
     }
 }
-
