@@ -9,7 +9,7 @@ class birthdayInfo
     {
         return array(
             'Name' => "Birthday extension for Exponential",
-            'Version' => "1.3.8",
+            'Version' => "1.3.9",
             'Copyright' => "Copyright (C) 1998 - 2026 Exponential Foundation and 7x and xrow GmbH and Netgen d.o.o.",
             'License' => "GNU General Public License v2.0 (or any later version)",
             'Info_url' => "https://github.com/se7enxweb/birthday"
